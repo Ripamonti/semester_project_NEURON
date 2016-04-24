@@ -47,6 +47,7 @@
 #include "ChebyshevIntegrators.h"
 #include "Ode.h"
 #include "Mesh.h"
+#include "problem.h"
 
 using namespace std;
 
@@ -57,7 +58,6 @@ int main(int argc, char** argv)
     double dt =  0.025;		//initial step size
     double rtol= 1.0e-2;	//relative tolerance
     double atol= rtol; 	      	//absolute tolerance
-    bool print_GNU=true;
 
 //----------------    DEFAULT INTEGRATION OPTIONS   ----------------------------
     bool dt_adaptivity = false; 	//time step adaptivity enabled/disabled
@@ -80,37 +80,63 @@ int main(int argc, char** argv)
     Mesh mesh(dx);			//initialize the mesh
     mesh.print_info();
 
-//-------------------    PROBLEM INITIALIZATION  -------------------------------
-    ODE* cable = new ODE(mesh,intrho,tend);
-    ODE* gates = new ODE(mesh,intrho,tend);
+//-----------------    INITIAL DATA DEFINITION  --------------------------------
+    vector<double> pot_initial(mesh.n_elem,-64.974);
+    double alpha_n(0.01*(-(-64.974+55.0))/(exp(-(-64.974+55)/10)-1));
+    double beta_n(0.125*exp(-(-64.974+65)/80));
+    double alpha_m(0.1*(-(64.974+40))/(exp(-(-64.974+40)/10)-1));
+    double beta_m(0.4*exp(-(-64.974+65)/18));
+    double alpha_h(0.07*exp(-(-64.974+65)/20));
+    double beta_h(1/(exp(-(-64.974+35)/10)+1));
+    vector<double> n_initial(mesh.n_elem,alpha_n/(alpha_n+beta_n));
+    vector<double> m_initial(mesh.n_elem,alpha_m/(alpha_m+beta_m));
+    vector<double> h_initial(mesh.n_elem,alpha_h/(alpha_h+beta_h));
 
-/*
+//-------------------    PROBLEM INITIALIZATION  -------------------------------
+    CABLE* cable = new CABLE(mesh,intrho,tend,pot_initial);
+    GATE_N* gate_n = new GATE_N(mesh,intrho,tend,n_initial);
+    GATE_M* gate_m = new GATE_M(mesh,intrho,tend,m_initial);
+    GATE_H* gate_h = new GATE_H(mesh,intrho,tend,h_initial);
+    gate_n->get_potential(cable->un);
+    gate_m->get_potential(cable->un);
+    gate_h->get_potential(cable->un);
+    cable->get_gate_state(gate_n->un,gate_m->un,gate_h->un);
+
 //---------------------    ROCK2/RKC INITIALIZATION  ---------------------------
     bool verbose=true;
-    if (print_GNU)
-      verbose=false;
-    //RKC rock(one_step, verbose, dt_adaptivity, atol, rtol, intrho);
-    ROCK2 rock(one_step, verbose, dt_adaptivity, atol, rtol, intrho);    
-    if (!print_GNU)
-      rock.print_info();
-
-
+    ROCK2 rock_cable(one_step, verbose, dt_adaptivity, atol, rtol, intrho); 
+    rock_cable.print_info();
+    verbose=true;
+    ROCK2 rock_gate_n(one_step, verbose, dt_adaptivity, atol, rtol, intrho);  
+    ROCK2 rock_gate_m(one_step, verbose, dt_adaptivity, atol, rtol, intrho);
+    ROCK2 rock_gate_h(one_step, verbose, dt_adaptivity, atol, rtol, intrho);   
 //-------------------------   TIME LOOP   --------------------------------------
 
-    if(rock.check_correctness(dt)==0) //checks if given parameters are ok
+    if(rock_cable.check_correctness(dt)==0 && rock_gate_n.check_correctness(dt)==0
+       && rock_gate_m.check_correctness(dt)==0 && rock_gate_h.check_correctness(dt)==0) //checks if given parameters are ok
         return 0;//something is wrong
-
     int idid = 2;
-    for(int iter=0;idid==2;++iter)
-    {
-        rock.advance(heat,dt,idid);
-    }   
-    if (!print_GNU)
-      rock.print_statistics();
+    dt=dt/2;
+    rock_gate_n.advance(gate_n,dt,idid);
+    rock_gate_m.advance(gate_m,dt,idid);
+    rock_gate_h.advance(gate_h,dt,idid);
+    dt=dt*2;    
+    idid=2;
+fflush(stdout);
 
-//---------------------------   WRITE ON SCREEN   ----------------------------------------
-    if (print_GNU)
+    for(int iter=0;idid==2||cable->time<tend;++iter)
     {
+        rock_cable.advance(cable,dt,idid);
+        rock_gate_n.advance(gate_n,dt,idid);
+        rock_gate_m.advance(gate_m,dt,idid);
+        rock_gate_h.advance(gate_h,dt,idid);
+        //printf(" %f ",cable->time);fflush(stdout);
+    }   
+      rock_gate_n.print_statistics();
+//---------------------------   WRITE ON SCREEN   ----------------------------------------
+   bool print_GNU=true;
+   if (print_GNU)
+   {
    FILE * branchA;
    FILE * branchB;
    FILE * branchC;
@@ -118,21 +144,20 @@ int main(int argc, char** argv)
    branchB = fopen ("branchB.txt","w");
    branchC = fopen ("branchC.txt","w");
     for (int i=0; i<(mesh.n_L1-1); i++){
-      fprintf(branchA,"%.8f \t %.8f \n",mesh.grid[i],heat->yn[i]);
+      fprintf(branchA,"%.8f \t %.8f \n",mesh.grid[i],cable->un[i]);
     }
    fclose (branchA);
     for (int i=(mesh.n_L1-1); i<(mesh.n_L1+mesh.n_L2-2); i++){
-      fprintf(branchB,"%.8f \t %.8f \n",mesh.grid[i],heat->yn[i]);
+      fprintf(branchB,"%.8f \t %.8f \n",mesh.grid[i],cable->un[i]);
     }
    fclose (branchB);
     for (int i=(mesh.n_L1+mesh.n_L2-2); i<mesh.n_elem; i++){
-      fprintf(branchC,"%.8f \t %.8f \n",mesh.grid[i],heat->yn[i]);
+      fprintf(branchC,"%.8f \t %.8f \n",mesh.grid[i],cable->un[i]);
     }
    fclose (branchC);
     }
 //------------------------   DEALLOCATE   -------------------------------------    
 //    delete heat;
-*/
     return 0;
 }
 

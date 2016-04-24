@@ -85,7 +85,7 @@ void Mesh::print_info()
 
 void Mesh::print_all()
 {
-  printf("List of all the nodes %d \n",grid.size());
+  printf("List of all the nodes %lu \n",grid.size());
   for (unsigned int i=0; i<grid.size(); i++)
     printf(" %f ",grid[i]);
   fflush(stdout);

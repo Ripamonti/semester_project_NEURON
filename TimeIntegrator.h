@@ -94,10 +94,13 @@ template<class ODE> class TimeIntegrator {
   protected:
   /*----------------------------------------- 
     Step variables
-  -----------------------------------------*/ 
+  -----------------------------------------*/
+protected: 
     double eigmax;		// Spectral radius of current time step
     double uround;		// Minimal time step allowed
+public:
     double err;		// Local error estimation
+protected:
     double errp;		// Local error estimated at the previuos step
     double fac;		// Factor used in the choice of the new time step
     double facp;		// Factor used in the previous step

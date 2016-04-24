@@ -72,13 +72,13 @@ class ODE
     std::vector<double> fnpu;
     std::vector<double> tmp1;
  
-    ODE(Mesh& mesh,bool intrho,double t);
+    ODE(Mesh& mesh,bool intrho,double t,std::vector<double>& init);
     void print_info();  
     std::vector<double>& get_un();  
     void set_un(std::vector<double>&); 
     void rho(double& eigmax); 
-    void rhs(double t, std::vector<double>& y, std::vector<double>& f);
-    void set_Dirichlet(double t, std::vector<double>& y, bool use=false);
+    virtual void rhs(double t, std::vector<double>& y, std::vector<double>& f)=0;
+    virtual void set_Dirichlet(double t, std::vector<double>& y, bool use=false)=0;
     double normalized_L2_norm(std::vector<double>& v);
    // ~ODE();
 };

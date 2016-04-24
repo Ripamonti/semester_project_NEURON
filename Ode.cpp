@@ -40,14 +40,8 @@
 #include "Ode.h"
 #include <cmath>
 
-ODE::ODE(Mesh& mesh,bool intrho,double t) : time(0) , tend(t), cte_rho(true), s_step(mesh.h_space), limit_branch_A(mesh.n_L1), limit_branch_B(mesh.n_L2)
+ODE::ODE(Mesh& mesh,bool intrho,double t,std::vector<double>& init) : un(init), time(0) , tend(t), cte_rho(false), s_step(mesh.h_space), limit_branch_A(mesh.n_L1), limit_branch_B(mesh.n_L2)
 , limit_branch_C(mesh.n_L3){
-  // Reserve space and define the initial condition
-  un.reserve(mesh.n_elem);
-  for (int i=0; i<mesh.n_elem; i++)
-  {
-    un.push_back(10*sin(mesh.grid[i]*2*M_PI/25));
-  }
   // Reserve space for auxiliary variables used during the time step
   yn.resize(mesh.n_elem);
   ynpu.resize(mesh.n_elem);
@@ -82,33 +76,6 @@ void ODE::rho(double& eigmax)
   // TODO: For the future implement a method for approximate the spectral radius of the problem
   // For now, give a (rough) theoretical approximation
   eigmax= 4/(s_step*s_step);
-}
- 
-void ODE::rhs(double t, std::vector<double>& y, std::vector<double>& f)
-{
-  // TODO: Implement a more efficient way to compute the rhs
-  
-  for (int i=1; i<(limit_branch_A-2); i++)
-    f[i]=(y[i+1]-2*y[i]+y[i-1])/(s_step*s_step);
-  f[limit_branch_A-2]=(y[limit_branch_A+limit_branch_B-2]-2*y[limit_branch_A-2]+y[limit_branch_A-3])/(s_step*s_step);
-  for (int i=limit_branch_A; i<(limit_branch_A+limit_branch_B+limit_branch_C-2); i++)
-    f[i]=(y[i+1]-2*y[i]+y[i-1])/(s_step*s_step);
-}
-
-void ODE::set_Dirichlet(double t, std::vector<double>& y, bool use)
-{
-  // TODO: Implement more general BD. Ask Giacomo the meaning of the variable use
-  if (!use)
-  {
-    y[0]=0; 
-    y[y.size()-1]=0;
-    y[limit_branch_A-1]=0;
-    y[limit_branch_A+limit_branch_B-2]=y[limit_branch_A+limit_branch_B-1]+y[limit_branch_A+limit_branch_B-3]-y[limit_branch_A-2];
-  } else {
-    y[0]=0; 
-    y[y.size()-1]=0;
-    y[limit_branch_A-2]=0;
-  }
 }
 
 double ODE::normalized_L2_norm(std::vector<double>& u)

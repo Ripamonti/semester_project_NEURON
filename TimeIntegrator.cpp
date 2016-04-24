@@ -156,10 +156,13 @@ void TimeIntegrator<ODE>::advance(ODE* ode, double& h, int& idid)
       yn.swap(y);
       fn_uptodate=false;	// fn not up to date anymore
 
-      if (last)  // We have finished
+      if (last||one_step)  // We have finished
       {
         // remember that idid=1
         ode->set_un(yn);	// Pass value to ODE, for outputs
+        if (one_step)//aggiunta mia
+          idid=2;// aggiunta mia
+        if (last)// aggiunta mia
         cout<<endl;
         break;
       }
@@ -238,7 +241,7 @@ void TimeIntegrator<ODE>::accepted_step(double& t, double& h, vector<double>& y)
   
   acc_steps++;
   facmax=2.0;		// h can grow 2 times
-  t=t+h;
+  t=t+h; //printf(" %f ",t);
   errp=err;
   if (reject)  // The previous time step has been rejected so a smaller h is chosen
   {
