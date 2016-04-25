@@ -63,7 +63,7 @@ int main(int argc, char** argv)
     bool dt_adaptivity = false; 	//time step adaptivity enabled/disabled
     bool one_step=true;         	//advance one time step per ROCK2 call
     bool intrho=true;			//spectral radius computed internally in the time integrator
-    double tend=10;			//last time
+    double tend=400;			//last time
 
 //-----    READ OPTIONAL INPUT ACCURACY/INTEGRATION PARAMETERS   ---------------
     if(argc>1){
@@ -84,8 +84,8 @@ int main(int argc, char** argv)
     vector<double> pot_initial(mesh.n_elem,-64.974);
     double alpha_n(0.01*(-(-64.974+55.0))/(exp(-(-64.974+55)/10)-1));
     double beta_n(0.125*exp(-(-64.974+65)/80));
-    double alpha_m(0.1*(-(64.974+40))/(exp(-(-64.974+40)/10)-1));
-    double beta_m(0.4*exp(-(-64.974+65)/18));
+    double alpha_m(0.1*(-(-64.974+40))/(exp(-(-64.974+40)/10)-1));
+    double beta_m(4*exp(-(-64.974+65)/18));
     double alpha_h(0.07*exp(-(-64.974+65)/20));
     double beta_h(1/(exp(-(-64.974+35)/10)+1));
     vector<double> n_initial(mesh.n_elem,alpha_n/(alpha_n+beta_n));
