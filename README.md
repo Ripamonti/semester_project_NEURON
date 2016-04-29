@@ -4,4 +4,6 @@ Structure of the code:
 * **include**: contains header files.  
 * **bin**: contains the executable once the code is compiled.  
 * **output**: contains output data.  
-* **build**: contains the object files (created after compiling).  
+* **build**: contains the object files (created after compiling). 
+<br />
+Make command:
