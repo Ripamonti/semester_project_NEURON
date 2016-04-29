@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 {
 //----------------    DEFAULT ACCURACY PARAMETERS   ----------------------------
     int n_ref = 2;    		//mesh size or mesh name depending if non local or local
-    double dt =  0.025;		//initial step size
+    double dt =  0.001;		//initial step size
     double rtol= 1.0e-2;	//relative tolerance
     double atol= rtol; 	      	//absolute tolerance
 
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
     bool dt_adaptivity = false; 	//time step adaptivity enabled/disabled
     bool one_step=true;         	//advance one time step per ROCK2 call
     bool intrho=true;			//spectral radius computed internally in the time integrator
-    double tend=400;			//last time
+    double tend=10;			//last time
 
 //-----    READ OPTIONAL INPUT ACCURACY/INTEGRATION PARAMETERS   ---------------
     if(argc>1){
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     }
 
 //-------------------    MESH INITIALIZATION  ----------------------------------
-    double dx = 0.5;			//grid space
+    double dx = 5;			//grid space
     Mesh mesh(dx);			//initialize the mesh
     mesh.print_info();
 
@@ -103,13 +103,13 @@ int main(int argc, char** argv)
     cable->get_gate_state(gate_n->un,gate_m->un,gate_h->un);
 
 //---------------------    ROCK2/RKC INITIALIZATION  ---------------------------
-    bool verbose=true;
-    ROCK2 rock_cable(one_step, verbose, dt_adaptivity, atol, rtol, intrho); 
+    bool verbose=true; 
+    RKC rock_cable(one_step, verbose, dt_adaptivity, atol, rtol, intrho); 
     rock_cable.print_info();
     verbose=true;
-    ROCK2 rock_gate_n(one_step, verbose, dt_adaptivity, atol, rtol, intrho);  
-    ROCK2 rock_gate_m(one_step, verbose, dt_adaptivity, atol, rtol, intrho);
-    ROCK2 rock_gate_h(one_step, verbose, dt_adaptivity, atol, rtol, intrho);   
+    RKC rock_gate_n(one_step, verbose, dt_adaptivity, atol, rtol, intrho);  
+    RKC rock_gate_m(one_step, verbose, dt_adaptivity, atol, rtol, intrho);
+    RKC rock_gate_h(one_step, verbose, dt_adaptivity, atol, rtol, intrho);   
 //-------------------------   TIME LOOP   --------------------------------------
 
     if(rock_cable.check_correctness(dt)==0 && rock_gate_n.check_correctness(dt)==0
@@ -140,9 +140,9 @@ fflush(stdout);
    FILE * branchA;
    FILE * branchB;
    FILE * branchC;
-   branchA = fopen ("branchA.txt","w");
-   branchB = fopen ("branchB.txt","w");
-   branchC = fopen ("branchC.txt","w");
+   branchA = fopen ("../output/branchA.txt","w");
+   branchB = fopen ("../output/branchB.txt","w");
+   branchC = fopen ("../output/branchC.txt","w");
     for (int i=0; i<(mesh.n_L1-1); i++){
       fprintf(branchA,"%.8f \t %.8f \n",mesh.grid[i],cable->un[i]);
     }

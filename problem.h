@@ -70,4 +70,4 @@ class GATE_H : public ODE
     void rhs(double t, std::vector<double>& y, std::vector<double>& f);
 };
 
-#endif	/* MESH_H */
+#endif	/* PROBLEM_H */

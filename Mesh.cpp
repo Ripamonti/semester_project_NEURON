@@ -44,9 +44,9 @@ Mesh::Mesh(double dx): h_space(dx)
 {
 // Compute the number of the elements of the mesh given dx 
   n_elem = round(150/dx+2*250/dx+4);
-  n_L1 = round(150./dx+2.);
-  n_L2 = round(250./dx+2.);
-  n_L3 = round(250./dx+2.);
+  n_L1 = round(150/dx+2.);
+  n_L2 = round(250/dx+2.);
+  n_L3 = round(250/dx+2.);
 // Reserve space in memory for the grid
   grid.resize(n_elem);
 // Fill the points in the grid paying attention to the boundaries, where we have dx/2

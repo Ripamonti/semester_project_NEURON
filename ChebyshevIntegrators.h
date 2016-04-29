@@ -41,7 +41,6 @@
 #define	CHEBYSHEVINTEGRATORS_H
 
 #include "TimeIntegrator.h"
-#include "TimeIntegrator.cpp"
 #include "Ode.h"
 #include "operation.h"
 

@@ -41,7 +41,6 @@
 #include <iostream>
 #include <cmath>
 
-#include "operation.cpp"
 #include "operation.h"
 
 RKC::RKC(bool onestep, bool verb, bool dtadap, 
