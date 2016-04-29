@@ -3,7 +3,6 @@
 
 #include <vector>
 #include "Ode.h"
-//#include "Ode.cpp"
 
 class CABLE : public ODE
 {
@@ -12,7 +11,9 @@ class CABLE : public ODE
     std::vector<double>* n;	
     std::vector<double>* m;	
     std::vector<double>* h;	
-    int n_L1,n_L2,n_L3;
+    std::size_t n_L1;
+    std::size_t n_L2;
+    std::size_t n_L3;
     static constexpr double c_m=1;
     static constexpr double g_l=0.0003;
     static constexpr double e_l=-54.3;

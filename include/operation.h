@@ -41,20 +41,18 @@
 #define OPERATION_H
 
 #include <algorithm>
+#include <numeric>
 
-using namespace std;
+void add(std::vector<double>& v, double c, std::vector<double>& w);
 
-void add(vector<double>& v, double c, vector<double>& w);
+void add(std::vector<double>& v, double c);
 
-void add(vector<double>& v, double c);
+void add(std::vector<double>& v, std::vector<double>& w);
 
-void add(vector<double>& v,vector<double>& w);
+void scale(std::vector<double>& v, double c);
 
-void scale(vector<double>& v, double c);
+double l2_norm(std::vector<double> const& u);
 
-double l2_norm(vector<double> const& u);
+double l2_cont_norm(std::vector<double> const& u, double c);
 
-double l2_cont_norm(vector<double> const& u, double c);
-
-// TODO: Remember when you will solve the cable equation to add a l2 norm that takes into account the non uniform grid
-#endif
+#endif	/* OPERATION_H */

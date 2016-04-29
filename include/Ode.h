@@ -83,4 +83,4 @@ class ODE
    // ~ODE();
 };
 
-#endif	/* MESH_H */
+#endif	/* ODE_H */

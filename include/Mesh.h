@@ -47,9 +47,9 @@ class Mesh
 {
   public:
   double h_space;		// Grid-space
-  int n_elem;			// Number of elements
+  std::size_t n_elem;		// Number of elements
   std::vector<double> grid;	// Vector to contain the points of the grid
-  int n_L1,n_L2,n_L3;		// Integers used to manage the connectivity
+  std::size_t n_L1,n_L2,n_L3;	// Integers used to manage the connectivity
 
   Mesh(double dx);		// Constructor of the mesh
   void print_info();		// Print info regarding the mesh

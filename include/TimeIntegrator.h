@@ -47,8 +47,6 @@
 #include "Ode.h"
 #include "operation.h" 
 
-using namespace std;
-
 template<class ODE> class TimeIntegrator {
   public:
     TimeIntegrator(bool onestep=true, bool verb=true, bool dtadap=true, double atol=1e-2, double rtol=1e-2, bool intrho=false, bool scalartol=true);
@@ -58,9 +56,9 @@ template<class ODE> class TimeIntegrator {
     void print_statistics();			// Statistics at the end
 
   protected:
-    virtual void rtstep(ODE* ode, const double t, const double& h, vector<double>& y, vector<double>& yn)=0; // Do the stages
-    void accepted_step(double& t, double& h, vector<double>& y);
-    void rejected_step(double& t, double& h, vector<double>& y);
+    virtual void rtstep(ODE* ode, const double t, const double& h, std::vector<double>& y, std::vector<double>& yn)=0; // Do the stages
+    void accepted_step(double& t, double& h, std::vector<double>& y);
+    void rejected_step(double& t, double& h, std::vector<double>& y);
     void compute_hnew(double& h);		
     virtual void update_n_stages(double& h)=0; 			// Given rho computes the number of stages
     void update_rho(ODE* ode, int& idid);				// Updates the spectral radius
@@ -121,7 +119,7 @@ protected:
 template <class ODE>
 TimeIntegrator<ODE>::TimeIntegrator(bool onestep, bool verb, bool dtadap, double atol, double rtol, bool intrho, bool scalartol)
 {
-  uround=numeric_limits<double>::epsilon();
+  uround=std::numeric_limits<double>::epsilon();
   errp=0.0;
   nrho=1;
   facmax=5.0;
@@ -137,8 +135,8 @@ TimeIntegrator<ODE>::TimeIntegrator(bool onestep, bool verb, bool dtadap, double
   r_tol=rtol;
   a_tol=atol;
 
-  max_rho=numeric_limits<int>::min();
-  min_rho=numeric_limits<int>::max();
+  max_rho=std::numeric_limits<int>::min();
+  min_rho=std::numeric_limits<int>::max();
   max_s=0;
   n_f_eval_rho=0;
   n_f_eval=0;
@@ -146,22 +144,20 @@ TimeIntegrator<ODE>::TimeIntegrator(bool onestep, bool verb, bool dtadap, double
   acc_steps=0;
   rej_steps=0;
   dt_max=0.;
-  dt_min=numeric_limits<double>::max();
+  dt_min=std::numeric_limits<double>::max();
 }
 
 template <class ODE>
 void TimeIntegrator<ODE>::advance(ODE* ode, double& h, int& idid)
 {
-  double told;
-  vector<double> *swap_ptr;
+  //std::vector<double> *swap_ptr;
 
   double& t=ode->time;	// If t is modified then ode->time as well
   double tend=ode->tend;
+  std::vector<double>& y = ode->ynpu;	// Space for next computed solution
+  std::vector<double>& yn = ode->yn;  // Space for initial value 
 
-  vector<double>& y = ode->ynpu;	// Space for next computed solution
-  vector<double>& yn = ode->yn;  // Space for initial value 
-
-  told=t-1.;			// Different from t
+  told=t-1.;		// Different from t
   last=false;		// A priori is not the last step
   reject=false;		// If we enter advance then the previous step has been accepted
   idid=1;
@@ -186,21 +182,21 @@ void TimeIntegrator<ODE>::advance(ODE* ode, double& h, int& idid)
   {
     n_steps++;			// New time step
     // If we are very close to end or t+h>tend then adjust h
-    if (1.1*abs(h)>=abs(tend-t))	// h can be negative (when t>tend)
+    if (1.1*std::abs(h)>=std::abs(tend-t))	// h can be negative (when t>tend)
     {
       h=tend-t;
       last=true;		// It will be the last step (if accepted)
     }
     if (h<10.0*uround)		// Too small h
     {
-      cout << "Tolerances are too small." << endl;
+      std::cout << "Tolerances are too small." << std::endl;
       idid=-2;			// idid=-2 means that there's a problem
       return; 			// Exit
     }
 
     // Do some statistics
-    dt_max=max(dt_max,h);
-    dt_min=min(dt_min,h);
+    dt_max=std::max(dt_max,h);
+    dt_min=std::min(dt_min,h);
      
     // Compute spectral radius every 25 steps if it isn't constant
     if (!ode->cte_rho && nrho==0) // nrho==0 every 25 steps
@@ -227,9 +223,6 @@ void TimeIntegrator<ODE>::advance(ODE* ode, double& h, int& idid)
     {
       accepted_step(t,h,y);
       
-      /*swap_ptr=yn;
-      yn=y;			// yn takes the new value
-      y=swap_ptr;*/		// and y will be free free memory
       yn.swap(y);
       fn_uptodate=false;	// fn not up to date anymore
 
@@ -237,10 +230,8 @@ void TimeIntegrator<ODE>::advance(ODE* ode, double& h, int& idid)
       {
         // remember that idid=1
         ode->set_un(yn);	// Pass value to ODE, for outputs
-        if (one_step)//aggiunta mia
-          idid=2;// aggiunta mia
-        if (last)// aggiunta mia
-        cout<<endl;
+        if (one_step)
+          idid=2;
         break;
       }
     } else if(one_step) {
@@ -290,30 +281,30 @@ void TimeIntegrator<ODE>::compute_hnew(double& h)
     facp=1.0/err;
     fac=facp*(h/hp);
     fac=errp*fac*fac;
-    fac=min(facp,fac);
+    fac=std::min(facp,fac);
     fac=sqrt(fac);
   } 
   else // In first step we go here, or if the previous step has been rejected
     fac=sqrt(1.0/err);
-  fac=min(facmax,max(0.1,0.8*fac));  
-  hnew=h*fac;
+    fac=std::min(facmax,std::max(0.1,0.8*fac));  
+    hnew=h*fac;
 }
 
 template <class ODE>
-void TimeIntegrator<ODE>::accepted_step(double& t, double& h, vector<double>& y)
+void TimeIntegrator<ODE>::accepted_step(double& t, double& h, std::vector<double>& y)
 {
   // Called when the step is accepted. Does output, sets the new time step size and update some variables
   // Define delta character and red color
   std::string delta=u8"\u0394";
-  string bcol="\033[31;1m";
-  string ecol="\033[0m";
+  std::string bcol="\033[31;1m";
+  std::string ecol="\033[0m";
   if (dt_adaptivity && verbose)
-    cout<<"Step t = "<<t<<", "<<delta<<"t = "<<h
-    <<", s = "<<s<<". Acceptd with ||e_n||_L2 = "<<err<<endl;
+    std::cout<<"Step t = "<<t<<", "<<delta<<"t = "<<h
+    <<", s = "<<s<<". Acceptd with ||e_n||_L2 = "<<err<<std::endl;
     /* <<" and ||y_n||_Linf = "<<y */
   else if (verbose)
-    cout<<"Step t = "<<t<<", "<<delta<<"t = "<<h
-    <<", s = "<<s<<","<<(err>1? bcol:"")<<" ||e_n||_L2 = "<<err<<(err>1? ecol:"")<<endl;
+    std::cout<<"Step t = "<<t<<", "<<delta<<"t = "<<h
+    <<", s = "<<s<<","<<(err>1? bcol:"")<<" ||e_n||_L2 = "<<err<<(err>1? ecol:"")<<std::endl;
     /* si dovrebbe mettere la norma infinito.. */
   
   acc_steps++;
@@ -322,7 +313,7 @@ void TimeIntegrator<ODE>::accepted_step(double& t, double& h, vector<double>& y)
   errp=err;
   if (reject)  // The previous time step has been rejected so a smaller h is chosen
   {
-    hnew=h>0.0 ? min(hnew,h):max(hnew,h);
+    hnew=h>0.0 ? std::min(hnew,h):std::max(hnew,h);
     reject=false;  // This step has been accepted
     nrej=0;		 // Set the consecutive rejections to 0
   }
@@ -333,16 +324,16 @@ void TimeIntegrator<ODE>::accepted_step(double& t, double& h, vector<double>& y)
 }
 
 template <class ODE>
-void TimeIntegrator<ODE>::rejected_step(double& t, double& h, vector<double>& y)
+void TimeIntegrator<ODE>::rejected_step(double& t, double& h, std::vector<double>& y)
 {
   // Called when the step is rejected. Does output, choses the new time step and updates some variables
   // Define delta character and red color
   std::string delta=u8"\u0394";
-  string bcol="\033[31;1m";
-  string ecol="\033[0m";
+  std::string bcol="\033[31;1m";
+  std::string ecol="\033[0m";
   if (verbose)
-   cout<<"Step t = "<<t<<", "<<delta<<"t = "<<h
-   <<", s = "<<s<<"."<<bcol<<" Refected with ||e_n||_L2 = "<<err<<ecol<<endl;
+   std::cout<<"Step t = "<<t<<", "<<delta<<"t = "<<h
+   <<", s = "<<s<<"."<<bcol<<" Refected with ||e_n||_L2 = "<<err<<ecol<<std::endl;
    /* anche qui bisognerebbe mettere la norma infinito */ 
 
   rej_steps++;
@@ -376,20 +367,20 @@ int TimeIntegrator<ODE>::check_correctness(double& h)
   // Test the initial step size and tolerances
   if (h<10.0*uround)
   {
-    cout<<"Initial step-size is too small."<<endl;
+    std::cout<<"Initial step-size is too small."<<std::endl;
     return 0;
   }
   if (scalar_tol)	// Scalar tolerances
   {
     if (a_tol<=0.0 || r_tol<=10.0*uround)
     {
-      cout<<"Tolerances are too small."<<endl;
+      std::cout<<"Tolerances are too small."<<std::endl;
       return 0;
     }
   }
   else
   {
-    cerr<<"NON SCALAR TOLERANCES NOT IMPLEMENTED YET"<<endl;
+    std::cerr<<"NON SCALAR TOLERANCES NOT IMPLEMENTED YET"<<std::endl;
     return 0;
   }
   return 1;
@@ -411,10 +402,10 @@ void TimeIntegrator<ODE>::rho(double& eigmax, ODE* ode, int& idid)
 //       (if iwork(6)=0) or a perturbation of the last computed
 //       eigenvector (if iwork(6).neq.0).
 
-    vector<double>& yn = ode->yn;
-    vector<double>& fn = ode->fn;
-    vector<double>& dz = ode->dz1;
-    vector<double>& z  = ode->tmp1;
+    std::vector<double>& yn = ode->yn;
+    std::vector<double>& fn = ode->fn;
+    std::vector<double>& dz = ode->dz1;
+    std::vector<double>& z  = ode->tmp1;
 
     if (n_steps==0)
     {
@@ -467,7 +458,6 @@ void TimeIntegrator<ODE>::rho(double& eigmax, ODE* ode, int& idid)
     //here dzyn=||z-yn|| and z=yn+(small perturbation)
     //dzyn=||z-yn|| will be always true, even with new z in the loop
 
-    // D A  S I S T E M A R E
     //Start the power method for non linear operator rhs
     eigmax=0.0;
     for(int iter=1;iter<=maxiter;iter++)
@@ -483,7 +473,7 @@ void TimeIntegrator<ODE>::rho(double& eigmax, ODE* ode, int& idid)
         eigmax=dfzfn/dzyn; //approximation of the Rayleigh quotient (not with dot product but just norms)
         eigmax=safe*eigmax;
         
-        if (iter>=2 && abs(eigmax-eigmaxo)<= eigmax*tol)
+        if (iter>=2 && std::abs(eigmax-eigmaxo)<= eigmax*tol)
         {
             //The last perturbation is stored. It will very likely be a
             // good starting point for the next rho call.
@@ -501,7 +491,7 @@ void TimeIntegrator<ODE>::rho(double& eigmax, ODE* ode, int& idid)
         else
             break;
     }
-    cout<<"ERROR: Convergence failure in the spectral radius computation."<<endl;
+    std::cout<<"ERROR: Convergence failure in the spectral radius computation."<<std::endl;
     idid=-3;
 }
 
@@ -511,12 +501,12 @@ void TimeIntegrator<ODE>::print_info()
   /*----------------------------------------- 
     Integration Parameters
   -----------------------------------------*/
-  cout<<"\n-------   Integration parameters   ---------------"<<endl;
-  cout<<"Time-step adaptivity "<<(dt_adaptivity ? "enabled.":"disabled.")<<endl;
-  cout<<"Spectral radius computed "<<(internal_rho ? "internally.":"externally.")<<endl;
-  cout<<"Absolute tolerance = "<<a_tol<<endl;
-  cout<<"Relative tolerance = "<<r_tol<<endl;
-  cout<<"--------------------------------------------------\n"<<endl;
+  std::cout<<"\n-------   Integration parameters   ---------------"<<std::endl;
+  std::cout<<"Time-step adaptivity "<<(dt_adaptivity ? "enabled.":"disabled.")<<std::endl;
+  std::cout<<"Spectral radius computed "<<(internal_rho ? "internally.":"externally.")<<std::endl;
+  std::cout<<"Absolute tolerance = "<<a_tol<<std::endl;
+  std::cout<<"Relative tolerance = "<<r_tol<<std::endl;
+  std::cout<<"--------------------------------------------------\n"<<std::endl;
 }
 
 template <class ODE> 
@@ -525,17 +515,17 @@ void TimeIntegrator<ODE>::print_statistics()
   /*----------------------------------------- 
     Integration Statistics
   -----------------------------------------*/
-  cout<<"\n--------   Integration Statistics   ----------------"<<endl;
-  cout<<"Max estimation of the spectral radius = "<<max_rho<<endl;
-  cout<<"Min estimation of the spectral radius = "<<min_rho<<endl;
-  cout<<"Max number of stages used = "<<max_s<<endl;
-  cout<<"Number of f total evaluations = "<<n_f_eval<<endl;
-  cout<<"Number of f eval. for the spectr. radius = "<<n_f_eval_rho<<endl;
-  cout<<"Maximal time step used: "<<dt_max<<endl;
-  cout<<"Steps: "<<n_steps<<endl;
-  cout<<"Accepted steps: "<<acc_steps<<endl;
-  cout<<"Rejected steps: "<<rej_steps<<endl; 
-  cout<<"----------------------------------------------------\n"<<endl;
+  std::cout<<"\n--------   Integration Statistics   ----------------"<<std::endl;
+  std::cout<<"Max estimation of the spectral radius = "<<max_rho<<std::endl;
+  std::cout<<"Min estimation of the spectral radius = "<<min_rho<<std::endl;
+  std::cout<<"Max number of stages used = "<<max_s<<std::endl;
+  std::cout<<"Number of f total evaluations = "<<n_f_eval<<std::endl;
+  std::cout<<"Number of f eval. for the spectr. radius = "<<n_f_eval_rho<<std::endl;
+  std::cout<<"Maximal time step used: "<<dt_max<<std::endl;
+  std::cout<<"Steps: "<<n_steps<<std::endl;
+  std::cout<<"Accepted steps: "<<acc_steps<<std::endl;
+  std::cout<<"Rejected steps: "<<rej_steps<<std::endl; 
+  std::cout<<"----------------------------------------------------\n"<<std::endl;
 }
 
 #endif	/* TIMEINTEGRATOR_H */

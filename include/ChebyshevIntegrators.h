@@ -51,8 +51,8 @@ public:
         double atol=1e-2, double rtol=1e-2, bool intrho=false, bool scalartol=true);
 protected:
 
-    void rtstep(ODE* ode, const double t, const double& h, vector<double>& y,
-                   vector<double>& yn);
+    void rtstep(ODE* ode, const double t, const double& h, std::vector<double>& y,
+                   std::vector<double>& yn);
     
     void update_n_stages(double& h);
     void init_coeffs(double *w, int s, double *bj, double *thj, double *zj, double *dzj, 
@@ -70,8 +70,8 @@ public:
     
 protected:
 
-    void rtstep(ODE* ode, const double t, const double& h, vector<double>& y,
-                   vector<double>& yn);
+    void rtstep(ODE* ode, const double t, const double& h, std::vector<double>& y,
+                   std::vector<double>& yn);
 
     void update_n_stages(double& h);
     void mdegr(int& mdeg, int mp[]);
