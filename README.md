@@ -1,5 +1,5 @@
 # semester_project_NEURON
-Structure of the code:
+Structure of the code:  
  **src**: contains the source files.
  **include**: contains header files.
  **bin**: contains the executable once the code is compiled.
