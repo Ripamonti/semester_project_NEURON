@@ -38,7 +38,7 @@
  */
 
 #include "Mesh.h"
-#include <math.h>
+#include <cmath>
 
 Mesh::Mesh(double dx): h_space(dx)
 {
@@ -54,21 +54,21 @@ Mesh::Mesh(double dx): h_space(dx)
 // First branch
   grid[0]=(n_L1-2)*h_space;
   grid[1]=grid[0]-dx/2;
-  for (int i=2;i<(n_L1-1);i++)
+  for (std::size_t i=2;i<(n_L1-1);i++)
   {
     grid[i]=grid[i-1]-dx;
   }  
 // Second branch
   grid[n_L1-1]=(n_L2-2)*h_space;
   grid[n_L1]=grid[n_L1-1]-dx/2;
-  for (int i=n_L1+1;i<(n_L1+n_L2-2);i++)
+  for (std::size_t i=n_L1+1;i<(n_L1+n_L2-2);i++)
   {
     grid[i]=grid[i-1]-dx;
   }
 // Third branch
   grid[n_L1+n_L2-2]=0;
   grid[n_L1+n_L2-1]=dx/2;
-  for (int i=n_L1+n_L2; i<=(n_L1+n_L2+n_L3-4);i++)
+  for (std::size_t i=n_L1+n_L2; i<=(n_L1+n_L2+n_L3-4);i++)
   {
     grid[i]=grid[i-1]+dx;
   }
@@ -78,7 +78,7 @@ Mesh::Mesh(double dx): h_space(dx)
 void Mesh::print_info()
 {
   printf("\n----------   Mesh informations   ------------------\n");
-  printf("Number of elements: %d\n",n_elem);
+  printf("Number of elements: %zu\n",n_elem);
   printf("Grid space: %f\n",h_space);
   printf("----------------------------------------------------\n");
 }
@@ -86,7 +86,7 @@ void Mesh::print_info()
 void Mesh::print_all()
 {
   printf("List of all the nodes %lu \n",grid.size());
-  for (unsigned int i=0; i<grid.size(); i++)
+  for (std::size_t i=0; i<grid.size(); i++)
     printf(" %f ",grid[i]);
   fflush(stdout);
 }

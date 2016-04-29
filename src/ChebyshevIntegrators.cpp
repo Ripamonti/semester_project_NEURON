@@ -40,7 +40,6 @@
 #include "ChebyshevIntegrators.h"
 #include <iostream>
 #include <cmath>
-
 #include "operation.h"
 
 RKC::RKC(bool onestep, bool verb, bool dtadap, 
@@ -66,14 +65,14 @@ void RKC::update_n_stages(double& h)
         last=false;
     }
     else//at least 3 stages
-        s=max(s,2)+1;
+        s=std::max(s,2)+1;
             
     if (s>max_s)
         max_s=s;
 }
 
 void RKC::rtstep(ODE* ode, const double t, const double& h, 
-                 vector<double>& y, vector<double>& yn)
+                 std::vector<double>& y, std::vector<double>& yn)
 {
 
     /**
@@ -82,8 +81,8 @@ void RKC::rtstep(ODE* ode, const double t, const double& h,
      * and sets the Dirichlet boundary conditions.
      */
 
-    vector<double>& fn= ode->fn;
-    vector<double>& yjm1= ode->fnpu; //yjm1=fnpu since at the end it will contain f(ynpu)    
+    std::vector<double>& fn= ode->fn;
+    std::vector<double>& yjm1= ode->fnpu; //yjm1=fnpu since at the end it will contain f(ynpu)    
  
     //the tmp1 variable is usable outside rtstep without danger
     //vector<double>& yjm2;//= ode->tmp1;
@@ -117,7 +116,7 @@ void RKC::rtstep(ODE* ode, const double t, const double& h,
     }
     //else fn already contains f(yn))
     //initialization
-    vector<double>& yjm2 = yn;
+    std::vector<double>& yjm2 = yn;
     yjm1 = yn;
 
     //in the following
@@ -148,10 +147,6 @@ void RKC::rtstep(ODE* ode, const double t, const double& h,
         // shift data if not last stage
         if(j<s)
         {
-            /*swap_ptr = yjm2;
-            yjm2=yjm1;
-            yjm1=y;
-            y = swap_ptr;*/ //free memory
             yjm2.swap(yjm1);
             yjm1.swap(y);
             shift_coeffs(bj,zj,dzj,d2zj,thj);
@@ -168,9 +163,9 @@ void RKC::rtstep(ODE* ode, const double t, const double& h,
         //account when estimating the local error here below.
 
         //estimating local error
-        for(int i=0;i<yjm1.size();++i)
+        for(std::size_t i=0;i<yjm1.size();++i)
         {   //see formula in RKC paper.
-            w[0] = a_tol+r_tol*max(abs(y[i]),abs(yn[i]));
+            w[0] = a_tol+r_tol*std::max(std::abs(y[i]),std::abs(yn[i]));
             w[1] = 0.8*(yn[i]-y[i])+0.4*h*(fn[i]+yjm1[i]);
             yjm2[i] = w[1]/w[0];
         }
@@ -178,7 +173,7 @@ void RKC::rtstep(ODE* ode, const double t, const double& h,
 // -------- Atol and rtol are array.--------
     else
     {
-        cerr<<"Error: non scalar tolerances not implemented yet"<<endl;
+        std::cerr<<"Error: non scalar tolerances not implemented yet"<<std::endl;
         return;
     }
 
@@ -194,7 +189,7 @@ void RKC::init_coeffs(double *w, int s, double *bj, double *thj, double *zj, dou
     const double c13=13.0;
     const double one = 1.0;
     const double two = 2.0;
-    const double four = 4.0;
+    //const double four = 4.0;
     const double zero = 0.0;
     double temp1, temp2, arg;
     
@@ -274,7 +269,7 @@ void ROCK2::update_n_stages(double& h)
         s=198; //s[0]=s-2 with s=200
     }
     else
-        s=max(s,2)-1; //s[0]=s-2
+        s=std::max(s,2)-1; //s[0]=s-2
         
     if(s!=sold) //if the number of stages has changes we recompute mp, which
         mdegr(s,mp);//is used to find the right coefficients in the tables.
@@ -284,8 +279,8 @@ void ROCK2::update_n_stages(double& h)
     
 }
 
-void ROCK2::rtstep(ODE* ode, const double t, const double& h, vector<double>& y,
-                   vector<double>& yn)
+void ROCK2::rtstep(ODE* ode, const double t, const double& h, std::vector<double>& y,
+                   std::vector<double>& yn)
 {
     /**
      * Does a ROCK2 step. Given \f$ y_n\f$ at \f$t\f$ it computes 
@@ -302,9 +297,9 @@ void ROCK2::rtstep(ODE* ode, const double t, const double& h, vector<double>& y,
 // *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** 
 //             Initializations
 // *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
-    vector<double>& fn= ode->fn;  // rhs
-    vector<double>& yjm1= ode->fnpu;// y_{j-1}
-    vector<double>& yjm2= ode->tmp1;// y_{j-2}
+    std::vector<double>& fn= ode->fn;  // rhs
+    std::vector<double>& yjm1= ode->fnpu;// y_{j-1}
+    std::vector<double>& yjm2= ode->tmp1;// y_{j-2}
     
     err=0.0; //local error
     
@@ -398,16 +393,16 @@ void ROCK2::rtstep(ODE* ode, const double t, const double& h, vector<double>& y,
         ode->set_Dirichlet(ci1,yjm2,true);
         
         //compute errors
-        for(int i=0;i<yjm1.size();++i)
+        for(std::size_t i=0;i<yjm1.size();++i)
         {
-            ci1 = max(abs(y[i]),abs(yn[i]));
+            ci1 = std::max(std::abs(y[i]),std::abs(yn[i]));
             yjm1[i] = yjm2[i]/(a_tol+ci1*r_tol);
         }
     }
 // -------- Atol and rtol are array.--------
     else
     {
-        cerr<<"Error: non scalar tolerances not implemented yet"<<endl;
+        std::cerr<<"Error: non scalar tolerances not implemented yet"<<std::endl;
         return;
     }    
 

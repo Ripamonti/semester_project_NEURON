@@ -38,9 +38,9 @@
  */
 
 #include "problem.h"
-#include <math.h>
+#include <cmath>
 // Constructor of CABLE object: call constructor of ODE for one variable
-CABLE::CABLE(Mesh& mesh,bool intrho,double t,std::vector<double>& init):ODE(mesh,intrho,t,init),n_L1(mesh.n_L1),n_L2(mesh.n_L2),n_L3(mesh.n_L3),n(NULL),m(NULL),h(NULL)
+CABLE::CABLE(Mesh& mesh,bool intrho,double t,std::vector<double>& init):ODE(mesh,intrho,t,init),n(NULL),m(NULL),h(NULL),n_L1(mesh.n_L1),n_L2(mesh.n_L2),n_L3(mesh.n_L3)
 {
 }
 
@@ -51,7 +51,7 @@ void CABLE::rhs(double t, std::vector<double>& y, std::vector<double>& f)
        -g_K*((*n)[1]*(*n)[1]*(*n)[1]*(*n)[1])*(y[1]-e_K)			// potassium current contribution
        -g_Na*((*m)[1]*(*m)[1]*(*m)[1])*(*h)[1]*(y[1]-e_Na)			// sodium current contribution
        -g_l*(y[1]-e_l));							// leak current contribution
-  for (unsigned int i=2; i<(n_L1-2); i++)
+  for (std::size_t i=2; i<(n_L1-2); i++)
   {
   // Points in branch A far from boundaries
     f[i]=(10^3)/c_m*(((10^4)*a)/(2*s_step*s_step*R)*(y[i+1]-2*y[i]+y[i-1])	// membrane current density
@@ -69,7 +69,7 @@ void CABLE::rhs(double t, std::vector<double>& y, std::vector<double>& f)
        -g_K*((*n)[n_L1]*(*n)[n_L1]*(*n)[n_L1]*(*n)[n_L1])*(y[n_L1]-e_K)					// potassium current contribution
        -g_Na*((*m)[n_L1]*(*m)[n_L1]*(*m)[n_L1])*(*h)[n_L1]*(y[n_L1]-e_Na)				// sodium current contribution
        -g_l*(y[n_L1]-e_l));										// leak current contribution
-  for (unsigned int i=n_L1+1; i<(n_L1+n_L2-3); i++)
+  for (std::size_t i=n_L1+1; i<(n_L1+n_L2-3); i++)
   {
   // Points in branch B far from boundaries
     f[i]=(10^3)/c_m*(((10^4)*a)/(2*s_step*s_step*R)*(y[i+1]-2*y[i]+y[i-1])		// membrane current density
@@ -88,7 +88,7 @@ void CABLE::rhs(double t, std::vector<double>& y, std::vector<double>& f)
        -g_K*((*n)[n_L1+n_L2-1]*(*n)[n_L1+n_L2-1]*(*n)[n_L1+n_L2-1]*(*n)[n_L1+n_L2-1])*(y[n_L1+n_L2-1]-e_K)			// potassium current contribution
        -g_Na*((*m)[n_L1+n_L2-1]*(*m)[n_L1+n_L2-1]*(*m)[n_L1+n_L2-1])*(*h)[n_L1+n_L2-1]*(y[n_L1+n_L2-1]-e_Na)			// sodium current contribution
        -g_l*(y[n_L1+n_L2-1]-e_l));												// leak current contribution 
-  for (unsigned int i=n_L1+n_L2; i<(n_L1+n_L2+n_L3-4); i++)
+  for (std::size_t i=n_L1+n_L2; i<(n_L1+n_L2+n_L3-4); i++)
   {
   // Points in branch C far from boundaries
     f[i]=(10^3)/c_m*(((10^4)*a)/(2*s_step*s_step*R)*(y[i+1]-2*y[i]+y[i-1])	// membrane current density

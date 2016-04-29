@@ -49,13 +49,11 @@
 #include "Mesh.h"
 #include "problem.h"
 
-using namespace std;
-
 int main(int argc, char** argv)
 {
 //----------------    DEFAULT ACCURACY PARAMETERS   ----------------------------
     int n_ref = 2;    		//mesh size or mesh name depending if non local or local
-    double dt =  0.001;		//initial step size
+    double dt =  0.0025;		//initial step size
     double rtol= 1.0e-2;	//relative tolerance
     double atol= rtol; 	      	//absolute tolerance
 
@@ -67,8 +65,8 @@ int main(int argc, char** argv)
 
 //-----    READ OPTIONAL INPUT ACCURACY/INTEGRATION PARAMETERS   ---------------
     if(argc>1){
-        istringstream Nbuf(argv[1]);
-        istringstream dtbuf(argv[2]);
+        std::istringstream Nbuf(argv[1]);
+        std::istringstream dtbuf(argv[2]);
         Nbuf>>n_ref;
         dtbuf>>dt;
         dt_adaptivity= (*argv[3]=='1');
@@ -76,21 +74,21 @@ int main(int argc, char** argv)
     }
 
 //-------------------    MESH INITIALIZATION  ----------------------------------
-    double dx = 5;			//grid space
+    double dx = 0.5;			//grid space
     Mesh mesh(dx);			//initialize the mesh
     mesh.print_info();
 
 //-----------------    INITIAL DATA DEFINITION  --------------------------------
-    vector<double> pot_initial(mesh.n_elem,-64.974);
+    std::vector<double> pot_initial(mesh.n_elem,-64.974);
     double alpha_n(0.01*(-(-64.974+55.0))/(exp(-(-64.974+55)/10)-1));
     double beta_n(0.125*exp(-(-64.974+65)/80));
     double alpha_m(0.1*(-(-64.974+40))/(exp(-(-64.974+40)/10)-1));
     double beta_m(4*exp(-(-64.974+65)/18));
     double alpha_h(0.07*exp(-(-64.974+65)/20));
     double beta_h(1/(exp(-(-64.974+35)/10)+1));
-    vector<double> n_initial(mesh.n_elem,alpha_n/(alpha_n+beta_n));
-    vector<double> m_initial(mesh.n_elem,alpha_m/(alpha_m+beta_m));
-    vector<double> h_initial(mesh.n_elem,alpha_h/(alpha_h+beta_h));
+    std::vector<double> n_initial(mesh.n_elem,alpha_n/(alpha_n+beta_n));
+    std::vector<double> m_initial(mesh.n_elem,alpha_m/(alpha_m+beta_m));
+    std::vector<double> h_initial(mesh.n_elem,alpha_h/(alpha_h+beta_h));
 
 //-------------------    PROBLEM INITIALIZATION  -------------------------------
     CABLE* cable = new CABLE(mesh,intrho,tend,pot_initial);
@@ -124,15 +122,14 @@ int main(int argc, char** argv)
     idid=2;
 fflush(stdout);
 
-    for(int iter=0;idid==2||cable->time<tend;++iter)
+    for(int iter=0;(idid==2)&&(cable->time<tend);++iter)
     {
         rock_cable.advance(cable,dt,idid);
         rock_gate_n.advance(gate_n,dt,idid);
         rock_gate_m.advance(gate_m,dt,idid);
         rock_gate_h.advance(gate_h,dt,idid);
-        //printf(" %f ",cable->time);fflush(stdout);
     }   
-      rock_gate_n.print_statistics();
+      rock_cable.print_statistics();
 //---------------------------   WRITE ON SCREEN   ----------------------------------------
    bool print_GNU=true;
    if (print_GNU)
@@ -143,15 +140,15 @@ fflush(stdout);
    branchA = fopen ("../output/branchA.txt","w");
    branchB = fopen ("../output/branchB.txt","w");
    branchC = fopen ("../output/branchC.txt","w");
-    for (int i=0; i<(mesh.n_L1-1); i++){
+    for (std::size_t i=0; i<(mesh.n_L1-1); i++){
       fprintf(branchA,"%.8f \t %.8f \n",mesh.grid[i],cable->un[i]);
     }
    fclose (branchA);
-    for (int i=(mesh.n_L1-1); i<(mesh.n_L1+mesh.n_L2-2); i++){
+    for (std::size_t i=(mesh.n_L1-1); i<(mesh.n_L1+mesh.n_L2-2); i++){
       fprintf(branchB,"%.8f \t %.8f \n",mesh.grid[i],cable->un[i]);
     }
    fclose (branchB);
-    for (int i=(mesh.n_L1+mesh.n_L2-2); i<mesh.n_elem; i++){
+    for (std::size_t i=(mesh.n_L1+mesh.n_L2-2); i<mesh.n_elem; i++){
       fprintf(branchC,"%.8f \t %.8f \n",mesh.grid[i],cable->un[i]);
     }
    fclose (branchC);

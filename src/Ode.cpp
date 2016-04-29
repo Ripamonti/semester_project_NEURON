@@ -39,6 +39,7 @@
 
 #include "Ode.h"
 #include <cmath>
+#include <numeric>
 
 ODE::ODE(Mesh& mesh,bool intrho,double t,std::vector<double>& init) : un(init), time(0) , tend(t), cte_rho(false), s_step(mesh.h_space), limit_branch_A(mesh.n_L1), limit_branch_B(mesh.n_L2)
 , limit_branch_C(mesh.n_L3){
@@ -73,20 +74,12 @@ void ODE::set_un(std::vector<double>& v)
 
 void ODE::rho(double& eigmax)
 {
-  // TODO: For the future implement a method for approximate the spectral radius of the problem
-  // For now, give a (rough) theoretical approximation
   eigmax= 4/(s_step*s_step);
 }
 
 double ODE::normalized_L2_norm(std::vector<double>& u)
 {
-  // TODO: Ask how to compute this norm (discretize, continuous, meaning of normalized)
-  // For now use L2 continuous norm
-    double accum = 0.;
-    for (double x : u) {
-        accum += x * x;
-    }
-    return sqrt(s_step*accum);
+  return sqrt(s_step*std::inner_product(u.begin(), u.end(),u.begin(),0.0));
 }
 /*
 ODE::~ODE(void)

@@ -39,12 +39,13 @@
 
 #include <algorithm>
 #include "operation.h"
+#include <numeric>
 
 using namespace std;
 
 void add(vector<double>& v, double c, vector<double>& w)
 {
-  transform(v.begin(),v.end(),w.begin(),v.begin(),[&](double v, double w){return v+c*w;});
+  transform(v.begin(),v.end(),w.begin(),v.begin(),[c](double v, double w){return v+c*w;});
 }
 
 void add(vector<double>& v, double c)
@@ -54,7 +55,7 @@ transform(v.begin(), v.end(), v.begin(),bind2nd(std::plus<double>(), c));
 
 void add(vector<double>& v,vector<double>& w)
 {
-  transform(v.begin(),v.end(),w.begin(),v.begin(),[&](double v, double w){return v+w;});
+  transform(v.begin(),v.end(),w.begin(),v.begin(),[](double v, double w){return v+w;});
 }
 
 void scale(vector<double>& v, double c)
@@ -63,17 +64,9 @@ void scale(vector<double>& v, double c)
 }
 
 double l2_norm(vector<double> const& u) {
-    double accum = 0.;
-    for (double x : u) {
-        accum += x * x;
-    }
-    return sqrt(accum);
+return sqrt(std::inner_product(u.begin(), u.end(),u.begin(),0.0));
 }
 
 double l2_cont_norm(vector<double> const& u, double c) {
-      double accum = 0.;
-    for (double x : u) {
-        accum += x * x;
-    }
-    return sqrt(c*accum);
+return sqrt(c*std::inner_product(u.begin(), u.end(),u.begin(),0.0));
 }
