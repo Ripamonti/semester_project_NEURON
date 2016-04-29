@@ -7,3 +7,5 @@ Structure of the code:
 * **build**: contains the object files (created after compiling). 
 
 Make command:
+* **make**: compile and link
+* **make clean**: delete the executable in bin file and the entire build folder
