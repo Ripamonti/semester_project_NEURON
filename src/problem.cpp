@@ -136,9 +136,9 @@ void GATE_N::set_Dirichlet(double t, std::vector<double>& y, bool use)
 void GATE_N::rhs(double t, std::vector<double>& y, std::vector<double>& f)
 {
   for (unsigned int i=0; i<f.size(); i++)
-    f[i]=0.01*(-((*v)[i]+55))/(exp(-((*v)[i]+55)/10)-1)		// alpha_n
-         *(1-y[i])						// *(1-n)
-         -0.125*exp(-((*v)[i]+65)/80)				// -beta_n
+    f[i]=0.01*(-((*v)[i]+55.0))/(exp(-((*v)[i]+55.0)/10.0)-1.0)	// alpha_n
+         *(1.0-y[i])						// *(1-n)
+         -0.125*exp(-((*v)[i]+65.0)/80.0)			// -beta_n
          *y[i];							// *n
 }
 
@@ -158,7 +158,7 @@ void GATE_M::set_Dirichlet(double t, std::vector<double>& y, bool use)
 void GATE_M::rhs(double t, std::vector<double>& y, std::vector<double>& f)
 {
   for (unsigned int i=0; i<f.size(); i++)
-    f[i]=0.1*(-((*v)[i]+40))/(exp(-((*v)[i]+40.0)/10.0)-1.0)		// alpha_m
+    f[i]=0.1*(-((*v)[i]+40.0))/(exp(-((*v)[i]+40.0)/10.0)-1.0)	// alpha_m
          *(1.0-y[i])						// *(1-m)
          -4.0*exp(-((*v)[i]+65.0)/20.0)				// -beta_m
          *y[i];							// *m
@@ -180,8 +180,8 @@ void GATE_H::set_Dirichlet(double t, std::vector<double>& y, bool use)
 void GATE_H::rhs(double t, std::vector<double>& y, std::vector<double>& f)
 {
   for (unsigned int i=0; i<f.size(); i++)
-    f[i]=0.07*exp(-((*v)[i]+65)/20)				// alpha_h
+    f[i]=0.07*exp(-((*v)[i]+65.0)/20.0)				// alpha_h
          *(1-y[i])						// *(1-h)
-         -1.0/(exp(-((*v)[i]+35)/10)+1)				// -beta_h
+         -1.0/(exp(-((*v)[i]+35.0)/10.0)+1.0)			// -beta_h
          *y[i];							// *h
 }

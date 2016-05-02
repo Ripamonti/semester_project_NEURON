@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 {
 //----------------    DEFAULT ACCURACY PARAMETERS   ----------------------------
     int n_ref = 2;    		//mesh size or mesh name depending if non local or local
-    double dt =  0.0025;		//initial step size
+    double dt =  0.0005;	//initial step size
     double rtol= 1.0e-2;	//relative tolerance
     double atol= rtol; 	      	//absolute tolerance
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
     }
 
 //-------------------    MESH INITIALIZATION  ----------------------------------
-    double dx = 0.5;			//grid space
+    double dx = 0.01;			//grid space
     Mesh mesh(dx);			//initialize the mesh
     mesh.print_info();
 
@@ -102,18 +102,21 @@ int main(int argc, char** argv)
 
 //---------------------    ROCK2/RKC INITIALIZATION  ---------------------------
     bool verbose=true; 
-    RKC rock_cable(one_step, verbose, dt_adaptivity, atol, rtol, intrho); 
+    ROCK2 rock_cable(one_step, verbose, dt_adaptivity, atol, rtol, intrho); 
     rock_cable.print_info();
     verbose=true;
-    RKC rock_gate_n(one_step, verbose, dt_adaptivity, atol, rtol, intrho);  
-    RKC rock_gate_m(one_step, verbose, dt_adaptivity, atol, rtol, intrho);
-    RKC rock_gate_h(one_step, verbose, dt_adaptivity, atol, rtol, intrho);   
+    ROCK2 rock_gate_n(one_step, verbose, dt_adaptivity, atol, rtol, intrho);  
+    ROCK2 rock_gate_m(one_step, verbose, dt_adaptivity, atol, rtol, intrho);
+    ROCK2 rock_gate_h(one_step, verbose, dt_adaptivity, atol, rtol, intrho);   
 //-------------------------   TIME LOOP   --------------------------------------
 
     if(rock_cable.check_correctness(dt)==0 && rock_gate_n.check_correctness(dt)==0
        && rock_gate_m.check_correctness(dt)==0 && rock_gate_h.check_correctness(dt)==0) //checks if given parameters are ok
         return 0;//something is wrong
     int idid = 2;
+    FILE * monitor_ending_branchA_potential;
+    monitor_ending_branchA_potential = fopen ("../output/monitor_ending_branchA_potential.txt","w");
+    fprintf(monitor_ending_branchA_potential,"%.8f \t %.8f \n",cable->time,cable->un[mesh.n_L1+mesh.n_L2-5]);
     dt=dt/2;
     rock_gate_n.advance(gate_n,dt,idid);
     rock_gate_m.advance(gate_m,dt,idid);
@@ -122,36 +125,74 @@ int main(int argc, char** argv)
     idid=2;
 fflush(stdout);
 
-    for(int iter=0;(idid==2)&&(cable->time<tend);++iter)
+    for(int iter=0;(idid==2)&&(cable->time<=tend);++iter)
     {
         rock_cable.advance(cable,dt,idid);
+        fprintf(monitor_ending_branchA_potential,"%.12f \t %.12f \n",cable->time,cable->un[mesh.n_L1+mesh.n_L2-5]);
         rock_gate_n.advance(gate_n,dt,idid);
         rock_gate_m.advance(gate_m,dt,idid);
         rock_gate_h.advance(gate_h,dt,idid);
     }   
-      rock_cable.print_statistics();
+   fclose (monitor_ending_branchA_potential);
+   rock_cable.print_statistics();
 //---------------------------   WRITE ON SCREEN   ----------------------------------------
    bool print_GNU=true;
    if (print_GNU)
    {
-   FILE * branchA;
-   FILE * branchB;
-   FILE * branchC;
-   branchA = fopen ("../output/branchA.txt","w");
-   branchB = fopen ("../output/branchB.txt","w");
-   branchC = fopen ("../output/branchC.txt","w");
+   FILE * branchA_potential;
+   FILE * branchB_potential;
+   FILE * branchC_potential;
+   FILE * branchA_gate_n;
+   FILE * branchB_gate_n;
+   FILE * branchC_gate_n;
+   FILE * branchA_gate_m;
+   FILE * branchB_gate_m;
+   FILE * branchC_gate_m;
+   FILE * branchA_gate_h;
+   FILE * branchB_gate_h;
+   FILE * branchC_gate_h;
+   branchA_potential = fopen ("../output/branchA_potential.txt","w");
+   branchB_potential = fopen ("../output/branchB_potential.txt","w");
+   branchC_potential = fopen ("../output/branchC_potential.txt","w");
+   branchA_gate_n = fopen ("../output/branchA_gate_n.txt","w");
+   branchB_gate_n = fopen ("../output/branchB_gate_n.txt","w");
+   branchC_gate_n = fopen ("../output/branchC_gate_n.txt","w");
+   branchA_gate_m = fopen ("../output/branchA_gate_m.txt","w");
+   branchB_gate_m = fopen ("../output/branchB_gate_m.txt","w");
+   branchC_gate_m = fopen ("../output/branchC_gate_m.txt","w");
+   branchA_gate_h = fopen ("../output/branchA_gate_h.txt","w");
+   branchB_gate_h = fopen ("../output/branchB_gate_h.txt","w");
+   branchC_gate_h = fopen ("../output/branchC_gate_h.txt","w");
     for (std::size_t i=0; i<(mesh.n_L1-1); i++){
-      fprintf(branchA,"%.8f \t %.8f \n",mesh.grid[i],cable->un[i]);
+      fprintf(branchA_potential,"%.12f \t %.12f \n",mesh.grid[i],cable->un[i]);
+      fprintf(branchA_gate_n,"%.12f \t %.12f \n",mesh.grid[i],gate_n->un[i]);
+      fprintf(branchA_gate_m,"%.12f \t %.12f \n",mesh.grid[i],gate_m->un[i]);
+      fprintf(branchA_gate_h,"%.12f \t %.12f \n",mesh.grid[i],gate_h->un[i]);
     }
-   fclose (branchA);
+   fclose (branchA_potential);
+   fclose (branchA_gate_n);
+   fclose (branchA_gate_m);
+   fclose (branchA_gate_h);
     for (std::size_t i=(mesh.n_L1-1); i<(mesh.n_L1+mesh.n_L2-2); i++){
-      fprintf(branchB,"%.8f \t %.8f \n",mesh.grid[i],cable->un[i]);
+      fprintf(branchB_potential,"%.12f \t %.12f \n",mesh.grid[i],cable->un[i]);
+      fprintf(branchB_gate_n,"%.12f \t %.12f \n",mesh.grid[i],gate_n->un[i]);
+      fprintf(branchB_gate_m,"%.12f \t %.12f \n",mesh.grid[i],gate_m->un[i]);
+      fprintf(branchB_gate_h,"%.12f \t %.12f \n",mesh.grid[i],gate_h->un[i]);
     }
-   fclose (branchB);
+   fclose (branchB_potential);
+   fclose (branchB_gate_n);
+   fclose (branchB_gate_m);
+   fclose (branchB_gate_h);
     for (std::size_t i=(mesh.n_L1+mesh.n_L2-2); i<mesh.n_elem; i++){
-      fprintf(branchC,"%.8f \t %.8f \n",mesh.grid[i],cable->un[i]);
+      fprintf(branchC_potential,"%.12f \t %.12f \n",mesh.grid[i],cable->un[i]);
+      fprintf(branchC_gate_n,"%.12f \t %.12f \n",mesh.grid[i],gate_n->un[i]);
+      fprintf(branchC_gate_m,"%.12f \t %.12f \n",mesh.grid[i],gate_m->un[i]);
+      fprintf(branchC_gate_h,"%.12f \t %.12f \n",mesh.grid[i],gate_h->un[i]);
     }
-   fclose (branchC);
+   fclose (branchC_potential);
+   fclose (branchC_gate_n);
+   fclose (branchC_gate_m);
+   fclose (branchC_gate_h);
     }
 //------------------------   DEALLOCATE   -------------------------------------    
 //    delete heat;
