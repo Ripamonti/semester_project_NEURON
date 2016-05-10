@@ -46,6 +46,7 @@ RKC::RKC(bool onestep, bool verb, bool dtadap,
          double atol, double rtol, bool intrho, bool scalartol)
 :TimeIntegrator(onestep,verb,dtadap,atol,rtol,intrho,scalartol)
 {
+  // The constructor of the derived class do nothing more than the base class
 }
 
 void RKC::update_n_stages(double& h)

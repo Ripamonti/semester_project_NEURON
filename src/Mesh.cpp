@@ -42,30 +42,31 @@
 
 Mesh::Mesh(double dx): h_space(dx)
 {
-// Compute the number of the elements of the mesh given dx 
+  // Compute the number of the elements of the mesh given dx 
+  //  N.B. We consider for each branch also the branching node
   n_elem = round(0.150/dx+2*0.250/dx+4);
   n_L1 = round(0.150/dx+2.);
   n_L2 = round(0.250/dx+2.);
   n_L3 = round(0.250/dx+2.);
-// Reserve space in memory for the grid
+  // Reserve space in memory for the grid
   grid.resize(n_elem);
-// Fill the points in the grid paying attention to the boundaries, where we have dx/2
-// As center of the branch we the branching node
-// First branch
-  grid[0]=(n_L1-2)*h_space;
+  // Fill the points in the grid paying attention to the boundaries, where we have dx/2
+  // As center of the branch we set the branching node
+  // First branch
+  grid[0]=(n_L1-2)*h_space;  // Start from farthest element of the grid (but first according to Hines enumeration)
   grid[1]=grid[0]-dx/2;
   for (std::size_t i=2;i<(n_L1-1);i++)
   {
     grid[i]=grid[i-1]-dx;
   }  
-// Second branch
+  // Second branch
   grid[n_L1-1]=(n_L2-2)*h_space;
   grid[n_L1]=grid[n_L1-1]-dx/2;
   for (std::size_t i=n_L1+1;i<(n_L1+n_L2-2);i++)
   {
     grid[i]=grid[i-1]-dx;
   }
-// Third branch
+  // Third branch
   grid[n_L1+n_L2-2]=0;
   grid[n_L1+n_L2-1]=dx/2;
   for (std::size_t i=n_L1+n_L2; i<=(n_L1+n_L2+n_L3-4);i++)

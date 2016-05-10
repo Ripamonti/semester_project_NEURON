@@ -51,15 +51,17 @@ ODE::ODE(Mesh& mesh,bool intrho,double t,std::vector<double>& init) : un(init), 
   dz1.resize(mesh.n_elem);
   z.resize(mesh.n_elem);
   fnpu.resize(mesh.n_elem);
-  tmp1.resize(mesh.n_elem); // Probailmente da togliere..
+  tmp1.resize(mesh.n_elem); // TODO: this variable is not used anymore
 
   // Space for the evaluation
   fn.resize(mesh.n_elem);
+ 
+  // N.B. .resize() is used instead of .reserve() for compatibility with the solver 
 }
 
 void ODE::print_info()
 {
-  // TODO
+  // TODO: Print some statistics regarding the problem
 }
 
 std::vector<double>& ODE::get_un()
@@ -69,12 +71,14 @@ std::vector<double>& ODE::get_un()
 
 void ODE::set_un(std::vector<double>& v)
 {
-  un=v;
+  un=v; // TODO: Try to modify this code in order to copy a pointer and not the vector
 }
 
 void ODE::rho(double& eigmax)
 {
-  eigmax= 4/(s_step*s_step);
+  // TODO: this method doesn't do nothing. We keep the method because sometimes, for certain 
+  // problems, is possible to get an analytical estimate of the spectral radius. For these cases
+  // it is enough to insert here the estimate and change the appropriate parameter in main.cpp
 }
 
 double ODE::normalized_L2_norm(std::vector<double>& u)

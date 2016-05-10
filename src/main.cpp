@@ -48,12 +48,13 @@
 #include "Ode.h"
 #include "Mesh.h"
 #include "problem.h"
+#include "ImplicitIntegrator.h"
 
 int main(int argc, char** argv)
 {
 //----------------    DEFAULT ACCURACY PARAMETERS   ----------------------------
     int n_ref = 2;    		//mesh size or mesh name depending if non local or local
-    double dt =  0.0005;	//initial step size
+    double dt =  0.0005;		//initial step size
     double rtol= 1.0e-2;	//relative tolerance
     double atol= rtol; 	      	//absolute tolerance
 
@@ -102,12 +103,13 @@ int main(int argc, char** argv)
 
 //---------------------    ROCK2/RKC INITIALIZATION  ---------------------------
     bool verbose=true; 
-    ROCK2 rock_cable(one_step, verbose, dt_adaptivity, atol, rtol, intrho); 
+    ROCK2 rock_cable(one_step, verbose, dt_adaptivity, atol, rtol, intrho);
+    //CN cn_cable(cable,one_step, verbose);
     rock_cable.print_info();
     verbose=true;
     ROCK2 rock_gate_n(one_step, verbose, dt_adaptivity, atol, rtol, intrho);  
     ROCK2 rock_gate_m(one_step, verbose, dt_adaptivity, atol, rtol, intrho);
-    ROCK2 rock_gate_h(one_step, verbose, dt_adaptivity, atol, rtol, intrho);   
+    ROCK2 rock_gate_h(one_step, verbose, dt_adaptivity, atol, rtol, intrho);
 //-------------------------   TIME LOOP   --------------------------------------
 
     if(rock_cable.check_correctness(dt)==0 && rock_gate_n.check_correctness(dt)==0
@@ -128,6 +130,7 @@ fflush(stdout);
     for(int iter=0;(idid==2)&&(cable->time<=tend);++iter)
     {
         rock_cable.advance(cable,dt,idid);
+        //cn_cable.advance(cable,dt,idid);
         fprintf(monitor_ending_branchA_potential,"%.12f \t %.12f \n",cable->time,cable->un[mesh.n_L1+mesh.n_L2-5]);
         rock_gate_n.advance(gate_n,dt,idid);
         rock_gate_m.advance(gate_m,dt,idid);

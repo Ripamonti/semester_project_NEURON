@@ -64,9 +64,9 @@ void scale(vector<double>& v, double c)
 }
 
 double l2_norm(vector<double> const& u) {
-return sqrt(std::inner_product(u.begin(), u.end(),u.begin(),0.0));
+  return sqrt(std::inner_product(u.begin(), u.end(),u.begin(),0.0));
 }
 
 double l2_cont_norm(vector<double> const& u, double c) {
-return sqrt(c*std::inner_product(u.begin(), u.end(),u.begin(),0.0));
+  return sqrt(c*std::inner_product(u.begin(), u.end(),u.begin(),0.0));
 }
