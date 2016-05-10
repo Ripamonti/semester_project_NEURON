@@ -49,11 +49,13 @@ class Mesh
   double h_space;		// Grid-space
   std::size_t n_elem;		// Number of elements
   std::vector<double> grid;	// Vector to contain the points of the grid
-  std::size_t n_L1,n_L2,n_L3;	// Integers used to manage the connectivity
-
-  Mesh(double dx);		// Constructor of the mesh
-  void print_info();		// Print info regarding the mesh
-  void print_all();		// Print all the points in the grid
+  std::size_t n_L1,n_L2,n_L3;	// Number of elements for each branch of the domain
+                                //   N.B. each of n_L1,n_L2 and n_L3 count also the branching node
+  // Constructor
+  Mesh(double dx);
+  // Print mesh infos
+  void print_info();
+  void print_all();
 };
 
 #endif	/* MESH_H */

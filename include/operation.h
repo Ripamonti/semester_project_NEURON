@@ -43,16 +43,17 @@
 #include <algorithm>
 #include <numeric>
 
+// Function to sum two vector: v=v+c*w
 void add(std::vector<double>& v, double c, std::vector<double>& w);
-
+// function to add a constant to the vector: v=v+c*(unitary vector)
 void add(std::vector<double>& v, double c);
-
+// Function to sum two vectors: v=v+w (More efficient for this simpler case)
 void add(std::vector<double>& v, std::vector<double>& w);
-
+// Multiply a vector for a constatn: v=c*v
 void scale(std::vector<double>& v, double c);
-
+// Compute the L2 norm
 double l2_norm(std::vector<double> const& u);
-
+// Compute the discrete L2 norm
 double l2_cont_norm(std::vector<double> const& u, double c);
 
 #endif	/* OPERATION_H */

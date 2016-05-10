@@ -47,16 +47,19 @@
 class RKC: public TimeIntegrator<ODE>
 {
 public:
+    // Constructor
     RKC(bool onestep=true, bool verb=true, bool dtadap=true, 
         double atol=1e-2, double rtol=1e-2, bool intrho=false, bool scalartol=true);
 protected:
-
+    // Step
     void rtstep(ODE* ode, const double t, const double& h, std::vector<double>& y,
                    std::vector<double>& yn);
-    
+    // Update the number of stages
     void update_n_stages(double& h);
+    // Compute the coefficients for the first time
     void init_coeffs(double *w, int s, double *bj, double *thj, double *zj, double *dzj, 
                      double *d2zj, double& kappa);
+    // Update the coefficients of the previous step
     void update_coeffs(double *w, double *bj, double *zj, double *dzj, double *d2zj, 
                        double& mu, double& nu, double& kappa, double& ajm1, double* thj);
     void shift_coeffs(double *bj, double *zj, double *dzj, double *d2zj, double* thj);
@@ -65,18 +68,17 @@ protected:
 class ROCK2: public TimeIntegrator<ODE>
 {
 public:
+    // Constructor
     ROCK2(bool onestep=true, bool verb=true, bool dtadap=true, 
           double atol=1e-2, double rtol=1e-2, bool intrho=false, bool scalartol=true);
-    
 protected:
-
+    // Step
     void rtstep(ODE* ode, const double t, const double& h, std::vector<double>& y,
                    std::vector<double>& yn);
-
+    // Update the coefficients
     void update_n_stages(double& h);
+    // Give the smallest number of stages that can be used and are available
     void mdegr(int& mdeg, int mp[]);
-    
- 
 protected:
     int mp[2];  ///<It is used in order to find the algorithm precomputed coefficients in the tables.
     

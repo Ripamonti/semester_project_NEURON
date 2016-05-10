@@ -46,15 +46,17 @@
 class ODE
 {
   public:
-    std::vector<double> un;		// Initial value
-
+    // Initial value
+    //   N.B. During the first step this stores the initial value.
+    //   Later in the simulation it will be used to store the value of the previous step
+    std::vector<double> un;
     // Allocate vector that keep in memory the step modified by RK
     std::vector<double> yn;		// Space for initial value at each step
     std::vector<double> ynpu;		// Space for the next computed solution in the step
-
+    // Time variables
     double time;			// Actual time in integration
     double tend;			// Ending time of computation
-
+ 
     bool cte_rho;			// TRUE if the spectrum is constant, FALSE otherwise
     double s_step;			// Spatial step size
 
@@ -62,25 +64,37 @@ class ODE
     int limit_branch_A;
     int limit_branch_B;
     int limit_branch_C;
-    
+    // Support vector used during the computation of the spectral radius through the power method
     std::vector<double> fn;
-
-    // Support vectors often used in the code to keep track of intermediate steps. They are declared here and initialized in the defined in the compiled file
-    // to save some time during computation
+    // Support vectors often used in the code to keep track of intermediate steps. They are declared here
     std::vector<double> dz1;
     std::vector<double> z;
     std::vector<double> fnpu;
     std::vector<double> tmp1;
- 
+ public:
+    // Constructor
     ODE(Mesh& mesh,bool intrho,double t,std::vector<double>& init);
+    // Print info regarding the problem
     void print_info();  
+    // Method to get the initial value/ previous step solution
+    //  N.B. A method is defined for compatibility with the ROCK2/RKC solver
     std::vector<double>& get_un();  
+    // Method to set the vector un
+    //  N.B. A method is defined for compatibility with the ROCK2/RKC solver
     void set_un(std::vector<double>&); 
+    // Method used to compute internally the spectral radius
     void rho(double& eigmax); 
+    // Method to define the rhs
     virtual void rhs(double t, std::vector<double>& y, std::vector<double>& f)=0;
+    // Method used to impose Dirichlet boundary condition if needed
     virtual void set_Dirichlet(double t, std::vector<double>& y, bool use=false)=0;
+    //  N.B. The previous two methods are implemented as virtual functions because
+    //       are problem dependent: for different problems one has to define manually
+    //       their behaviour in the derived class
+    // Compute the normalize L2 norm
     double normalized_L2_norm(std::vector<double>& v);
-   // ~ODE();
+    // TODO: implement the destructor of the class (I don't know if the standard is enough)
+    // ~ODE();
 };
 
-#endif	/* ODE_H */
+#endif	/* MESH_H */
